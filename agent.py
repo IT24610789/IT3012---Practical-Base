@@ -1,4 +1,6 @@
 # agent.py
+import random
+
 class GreedyGridAgent:
     """A simple agent that tries to move around systematically to clear the grid."""
 
@@ -10,3 +12,5 @@ class GreedyGridAgent:
         pos = percept['agent_pos']
         # Simple heuristic or fallback random sweep
         return random.choice(self.actions_pool)
+
+
