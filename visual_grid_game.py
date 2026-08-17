@@ -39,6 +39,15 @@ class VisualGridHuntGame:
         self.score = 0
         self.steps = 0
         self.collision = False
+        self.toxic_traps = set()
+
+        while(len(self.toxic_traps) < 10):
+            trap_x = random.randint(0, self.width - 1)
+            trap_y = random.randint(0, self.height - 1)
+
+            trap_position = (trap_x, trap_y)
+            if (trap_position != (0, 0) and trap_position not in self.walls and trap_position not  in self.food_positions):
+                self.toxic_traps.add(trap_position)
 
 
     def _get_cell_ahead(self) -> tuple:
@@ -166,6 +175,14 @@ class GridGameGUI:
             self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5, fill="#f59e0b",
                                     outline="#d97706")
 
+        for trap_x, trap_y in self.env.toxic_traps:
+            offset = self.cell_size * 0.25
+
+            x1 = trap_x * self.cell_size + offset
+            y1 = (self.env.height - 1 - trap_y) * self.cell_size + offset
+            self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5, fill="purple",
+                                    outline="darkviolet")
+
         for ox, oy in self.env.opponents:
             offset = self.cell_size * 0.2
             x1 = ox * self.cell_size + offset
@@ -202,5 +219,5 @@ class GridGameGUI:
 if __name__ == "__main__":
     root = tk.Tk()
     # Try a larger grid size like 12x12 with 15 food and 3 opponents!
-    app = GridGameGUI(root, width=12, height=12, num_food=15, num_opponents=0)
+    app = GridGameGUI(root, width=12, height=12, num_food=15, num_opponents=6)
     root.mainloop()
