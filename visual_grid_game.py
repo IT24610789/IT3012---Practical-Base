@@ -56,6 +56,9 @@ class VisualGridHuntGame:
         is_wall_ahead = next_cell in self.walls or not (0 <= nx < self.width and 0 <= ny < self.height)
         is_food_ahead = next_cell in self.food_positions
         return {
+            'grid_size': (self.width, self.height),
+            'walls': list(self.walls),
+            'all_food': list(self.food_positions),
             'wall_ahead': is_wall_ahead,
             'food_here': is_food_ahead,
             'opponent_positions': [list(op) for op in self.opponents],
