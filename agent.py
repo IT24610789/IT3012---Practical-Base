@@ -1,5 +1,116 @@
 # agent.py
 import random
+from collections import deque
+import heapq
+
+
+class SearchAgent:
+    """Offline graph-search agent for navigating a static grid."""
+
+    def __init__(self):
+        self.reached = set()
+        self.plan = []
+        self.active_algo = 'BFS'
+
+    def _neighbors(self, position, walls, grid_size):
+        x, y = position
+        width, height = grid_size
+
+        possible_moves = [
+            ("Up", (x, y + 1)),
+            ("Right", (x + 1, y)),
+            ("Down", (x, y - 1)),
+            ("Left", (x - 1, y)),
+        ]
+        return [
+            (action, coordinate)
+            for action, coordinate in possible_moves
+            if 0 <= coordinate[0] < width
+            and 0 <= coordinate[1] < height
+            and coordinate not in walls
+        ]
+
+    def bfs_search(self, start_pos, goal_pos, walls, grid_size):
+        walls = set(walls)
+        frontier = deque([(start_pos, [])])
+        self.reached = {start_pos}
+
+        while frontier:
+            position, path = frontier.popleft()
+            if position == goal_pos:
+                return path
+
+            for action, next_position in self._neighbors(position, walls, grid_size):
+                if next_position not in self.reached:
+                    self.reached.add(next_position)
+                    frontier.append((next_position, path + [action]))
+
+        return None
+
+
+    def dfs_search(self, start_pos, goal_pos, walls, grid_size):
+        walls = set(walls)
+        frontier = [(start_pos, [])]
+        self.reached = {start_pos}
+
+        while frontier:
+            position, path = frontier.pop()
+            if position == goal_pos:
+                return path
+
+            for action, next_position in reversed(self._neighbors(position, walls, grid_size)):
+                if next_position not in self.reached:
+                    self.reached.add(next_position)
+                    frontier.append((next_position, path + [action]))
+
+        return None
+
+    def ucs_search(self, start_pos, goal_pos, walls, grid_size):
+        walls = set(walls)
+        frontier = [(0, 0, start_pos, [])]
+        self.reached = {start_pos}
+        counter = 1
+
+        while frontier:
+            cost, _, position, path = heapq.heappop(frontier)
+            if position == goal_pos:
+                return path
+
+            for action, next_position in self._neighbors(position, walls, grid_size):
+                if next_position not in self.reached:
+                    self.reached.add(next_position)
+                    heapq.heappush(
+                        frontier,
+                        (cost + 1, counter, next_position, path + [action]),
+                    )
+                    counter += 1
+
+        return None
+
+    def sense_and_act(self, percept):
+        if not self.plan:
+            start_pos = tuple(percept['agent_pos'])
+            food_positions = [tuple(food) for food in percept['all_food']]
+
+            if not food_positions:
+                return "Stay"
+
+            closest_food = min(
+                food_positions,
+                key=lambda food: abs(food[0] - start_pos[0]) + abs(food[1] - start_pos[1]),
+            )
+
+            if self.active_algo == "BFS":
+                self.plan = self.bfs_search(start_pos, closest_food, percept['walls'], percept['grid_size'])
+            elif self.active_algo == "DFS":
+                self.plan = self.dfs_search(start_pos, closest_food, percept['walls'], percept['grid_size'])
+            else:
+                self.plan = self.ucs_search(start_pos, closest_food, percept['walls'], percept['grid_size'])
+
+            if self.plan is None:
+                self.plan = []
+
+        return self.plan.pop(0) if self.plan else "Stay"
 
 class GreedyGridAgent:
     """A simple agent that tries to move around systematically to clear the grid."""

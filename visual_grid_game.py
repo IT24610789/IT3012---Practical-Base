@@ -170,14 +170,14 @@ class GridGameGUI:
                 if self.cell_size >= 40 and (x, y) in self.env.walls:
                     self.canvas.create_text(x1 + self.cell_size / 2, y1 + self.cell_size / 2, text="W", fill="white",
                                             font=("Arial", 8, "bold"))
-
+        # drawing food
         for fx, fy in self.env.food_positions:
             offset = self.cell_size * 0.25
             x1 = fx * self.cell_size + offset
             y1 = (self.env.height - 1 - fy) * self.cell_size + offset
             self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5, fill="#f59e0b",
                                     outline="#d97706")
-
+        # drawing traps
         for trap_x, trap_y in self.env.toxic_traps:
             offset = self.cell_size * 0.25
 
@@ -185,7 +185,7 @@ class GridGameGUI:
             y1 = (self.env.height - 1 - trap_y) * self.cell_size + offset
             self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5, fill="purple",
                                     outline="darkviolet")
-
+        # drawing opponents
         for ox, oy in self.env.opponents:
             offset = self.cell_size * 0.2
             x1 = ox * self.cell_size + offset
