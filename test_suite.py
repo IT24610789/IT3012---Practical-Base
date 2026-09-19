@@ -105,6 +105,36 @@ class TestPractical3_SearchAgent(unittest.TestCase):
         self.assertTrue(is_empty_or_none, "BFS should return None or [] when the goal is unreachable.")
 
 
+class TestPractical4_SearchAgent(unittest.TestCase):
+    def setUp(self):
+        try:
+            self.search_agent = SearchAgent()
+        except NameError:
+            self.fail("SearchAgent class not found.")
+
+    def test_heuristic_output(self) -> int | float:
+        # mock test - pos(0,0) goal(3,4)
+        pos = (0,0)
+        goal = (3,4)
+
+        try:
+            result_manhattan = self.search_agent.manhattan_distance(pos, goal)
+            result_euclidean = self.search_agent.euclidean_distance(pos, goal)
+        except AttributeError:
+            self.fail("manhattan_distance or euclidean_distance method not implemented in SearchAgent.")
+
+        self.assertEqual(
+            result_manhattan,
+            7,
+            f"Expected Manhattan distance 7, got {result_manhattan}"
+        )
+
+        self.assertAlmostEqual(
+            result_euclidean,
+            5.0,
+            msg=f"Expected Euclidean distance 5.0, got {result_euclidean}"
+        )
+
 if __name__ == '__main__':
     # Run the test suite
     print("=== IT3012: Intelligent Agents - Autograder Test Suite ===\n")

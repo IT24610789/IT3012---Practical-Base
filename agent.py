@@ -2,7 +2,7 @@
 import random
 from collections import deque
 import heapq
-
+import math
 
 class SearchAgent:
     """Offline graph-search agent for navigating a static grid."""
@@ -11,6 +11,54 @@ class SearchAgent:
         self.reached = set()
         self.plan = []
         self.active_algo = 'BFS'
+
+    def manhattan_distance(self, pos, goal) -> int:
+        x1, y1 = pos
+        x2, y2 = goal
+        hn = abs(x1-x2) + abs(y2-y1)
+        return hn
+
+    def euclidean_distance(self, pos, goal) -> int:
+        x1, y1 = pos
+        x2, y2 = goal
+        hn = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+        return hn
+
+    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic_type='manhattan'):
+        walls = set(walls)
+        pq = []
+        reached_states = set()
+
+        if heuristic_type == 'euclidean':
+            heuristic = self.euclidean_distance
+        else:
+            heuristic = self.manhattan_distance
+
+        start_h = heuristic(start_pos, goal_pos)
+        heapq.heappush(pq, (start_h, 0, start_pos, []))
+
+        while pq:
+            f_cost, g_cost, current_pos, path_taken = heapq.heappop(pq)
+
+            if current_pos == goal_pos:
+                return path_taken
+
+            if current_pos in reached_states:
+                continue
+            reached_states.add(current_pos)
+
+            for action, next_pos in self._neighbors(current_pos, walls, grid_size):
+                if next_pos not in reached_states:
+                    new_g_cost = g_cost + 1
+                    new_h_cost = heuristic(next_pos, goal_pos)
+                    new_f_cost = new_g_cost + new_h_cost
+                    heapq.heappush(
+                        pq,
+                        (new_f_cost, new_g_cost, next_pos, path_taken + [action]),
+                    )
+
+        return None
+
 
     def _neighbors(self, position, walls, grid_size):
         x, y = position
@@ -104,6 +152,13 @@ class SearchAgent:
                 self.plan = self.bfs_search(start_pos, closest_food, percept['walls'], percept['grid_size'])
             elif self.active_algo == "DFS":
                 self.plan = self.dfs_search(start_pos, closest_food, percept['walls'], percept['grid_size'])
+            elif self.active_algo == "AStar":
+                self.plan = self.astar_search(
+                    start_pos,
+                    closest_food,
+                    percept['walls'],
+                    percept['grid_size'],
+                )
             else:
                 self.plan = self.ucs_search(start_pos, closest_food, percept['walls'], percept['grid_size'])
 
