@@ -152,6 +152,7 @@ class ModelBasedAgent:
         self.current_percept = percept
         
         if self.last_action == "turn_left":
+            curr_idx = self.directions.index(self.face_direction)
             self.face_direction = self.directions[(curr_idx - 1) % 4]
             
         elif self.last_action == "turn_right":
@@ -185,7 +186,7 @@ class ModelBasedAgent:
                 action = "turn_right"
                 
         else:
-            action = "turn_left"
+            action = "turn_right" if self.last_action == "turn_left" else "turn_left"
 
         self.last_action = action
         return action
